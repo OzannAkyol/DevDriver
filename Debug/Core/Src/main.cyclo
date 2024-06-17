@@ -1,0 +1,13 @@
+main.c:125:5:main	1
+main.c:157:19:MMA845x_Set_Sensor_Filter	4
+main.c:181:19:MMA845x_Set_Sensor_HP_Cutoff_Frequency	7
+main.c:212:19:MMA845x_Set_Sensor_Power_Mode	6
+main.c:296:19:MMA845x_Set_Data_Rate	2
+main.c:320:19:MMA845x_Set_Sensor_G_Mode	5
+main.c:357:19:MMA845x_Set_Sensor_State	4
+main.c:378:5:MMA845x_Test_Sensor	2
+main.c:389:9:MMA845x_Read_ID	2
+main.c:405:6:SystemClock_Config	3
+main.c:447:13:MX_I2C1_Init	2
+main.c:470:13:MX_GPIO_Init	1
+main.c:482:6:Error_Handler	1
