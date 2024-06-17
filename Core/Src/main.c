@@ -1,55 +1,65 @@
 #include "main.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 I2C_HandleTypeDef hi2c1;
 
 /*Some Specific Sensor Address*/
-#define MMA845x_ACTIVE_MASK_BIT			(0<<1)
-#define MMA845x_DEVICE_ADDR				(0x1C)
-#define MMA_845x_ACTIVE					(0x2B)
+#define MMA845x_DEVICE_ADDR						(0x1C)
+
 
 
 /*Some Sensor Register*/
-#define MMA845x_XYZ_DATA_CFG_REG	 	(0x0E)
-#define MMA845x_WHO_AM_I_REG			(0x0D)
-#define MMA845x_CTRL1_REG				(0x2A)
-#define MMA845x_HP_FILTER_CUTOFF_REG	(0x0F)
-#define MMA845x_CTRL2_REG				(0x2B)
-#define REG_SIZE						1
+#define MMA845x_XYZ_DATA_CFG_REG	 			(0x0E)
+#define MMA845x_WHO_AM_I_REG					(0x0D)
+#define MMA845x_CTRL1_REG						(0x2A)
+#define MMA845x_HP_FILTER_CUTOFF_REG			(0x0F)
+#define MMA845x_CTRL2_REG						(0x2B)
+#define MMA845x_STATUS_REG						(0x00)
+#define MMA845x_OUT_X_MSB						(0x01)
+#define MMA845x_OUT_X_LSB						(0x02)
+#define MMA845x_OUT_Y_MSB						(0x03)
+#define MMA845x_OUT_Y_LSB						(0x04)
+#define MMA845x_OUT_Z_MSB						(0x05)
+#define MMA845x_OUT_Z_LSB						(0x06)
+#define REG_SIZE								1
 
 /*Sensor Data Rate*/
-#define SET_DATA_RATE_800Hz			(0x00)
-#define SET_DATA_RATE_400Hz			(0x01)
-#define SET_DATA_RATE_200Hz			(0x02)
-#define SET_DATA_RATE_100Hz			(0x03)
-#define SET_DATA_RATE_50Hz			(0x04)
-#define SET_DATA_RATE_12_5Hz		(0x05)
-#define SET_DATA_RATE_6_5Hz			(0x06)
-#define SET_DATA_RATE_1_563Hz		(0x07)
-#define MAX_NUM_OF_SCALE_VALUE		(0x08)
+#define SET_DATA_RATE_800Hz						(0x00)
+#define SET_DATA_RATE_400Hz						(0x01)
+#define SET_DATA_RATE_200Hz						(0x02)
+#define SET_DATA_RATE_100Hz						(0x03)
+#define SET_DATA_RATE_50Hz						(0x04)
+#define SET_DATA_RATE_12_5Hz					(0x05)
+#define SET_DATA_RATE_6_5Hz						(0x06)
+#define SET_DATA_RATE_1_563Hz					(0x07)
+#define MAX_NUM_OF_SCALE_VALUE					(0x08)
 
 /*Sensor OverSampling Mode*/
-#define SENSOR_NORMAL_POWER_MODE_VAL					(0x00)
-#define SENSOR_LOW_NOISE_LOW_POWER_MODE_VAL				(0x01)
-#define SENSOR_HIGH_RESOLUTION_MODE_VAL					(0x02)
-#define SENSOR_LOW_POWER_MODE_VAL						(0x03)
-#define MAX_NUM_OF_SENSOR_MODE							(0x04)
+#define SENSOR_NORMAL_POWER_MODE_VAL			(0x00)
+#define SENSOR_LOW_NOISE_LOW_POWER_MODE_VAL		(0x01)
+#define SENSOR_HIGH_RESOLUTION_MODE_VAL			(0x02)
+#define SENSOR_LOW_POWER_MODE_VAL				(0x03)
+#define MAX_NUM_OF_SENSOR_MODE 					(0x04)
 
 /*Sensor */
-#define SET_CUTOFF_FREQ_16Hz			(0x00)
-#define SET_CUTOFF_FREQ_8Hz				(0x01)
-#define SET_CUTOFF_FREQ_4Hz				(0x02)
-#define SET_CUTOFF_FREQ_2Hz				(0x03)
+#define SET_CUTOFF_FREQ_16Hz					(0x00)
+#define SET_CUTOFF_FREQ_8Hz						(0x01)
+#define SET_CUTOFF_FREQ_4Hz						(0x02)
+#define SET_CUTOFF_FREQ_2Hz						(0x03)
 
+/*Some Sensor's Specific Bits */
+#define ZYXDR_BIT			(1 << 3)
+#define ACTIVE_MASK_BIT		(1 << 0)
 
 /*Sensor High Pass Filter Value*/
 #define MAX_NUM_OF_HP_FILTER_VALUE				(0x04)
 #define MMA845x_HPF_OUT_BIT_MASK				(0x10)
 
 /*DATA_MASK*/
-#define DR_MASK					 					(0x38)
-#define MMA845x_CTRL2_REG_BIT3_BIT4_MASK			(0x18)
-#define	MMA845x_CUTOFF_REG_BIT1_BIT0_MASK			(0x03)
+#define DR_MASK					 				(0x38)
+#define MMA845x_CTRL2_REG_BIT3_BIT4_MASK		(0x18)
+#define	MMA845x_CUTOFF_REG_BIT1_BIT0_MASK		(0x03)
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -59,6 +69,11 @@ static void MX_I2C1_Init(void);
 int retval =0;
 uint8_t Sensor_ID_Response =0;
 
+typedef struct{
+	uint16_t x_data;
+	uint16_t y_data;
+	uint16_t z_data;
+}SensorData;
 
 enum{
 
@@ -96,7 +111,7 @@ typedef enum SENSOR_MODE{
 	SENSOR_OK,		/*0*/
 	SENSOR_ERROR	/*1*/
 
-}SensorModeTypeDef;
+}SensorMode;
 
 typedef enum SENSOR_G_MODE{
 	SENSOR_2G_MODE,
@@ -106,20 +121,21 @@ typedef enum SENSOR_G_MODE{
 
 /*Library Functions*/
 int MMA845x_Test_Sensor(I2C_HandleTypeDef hi2c, uint8_t Device_Addres);
-uint8_t MMA845x_Read_ID(I2C_HandleTypeDef* hi2c, uint8_t Device_Addres, uint8_t RegAddress);
+uint8_t MMA845x_Read_ID(I2C_HandleTypeDef hi2c, uint8_t Device_Addres, uint8_t RegAddress);
 int Set_Sensor_Scale(int SCALE_TYPE);
-SensorModeTypeDef MMA845x_Set_Sensor_G_Mode(G_mode mode);
-SensorModeTypeDef MMA845x_Set_Data_Rate(unsigned char Data_Rate_Value);
-SensorModeTypeDef MMA845x_Set_Sensor_Power_Mode(unsigned char Sensor_Mode_Value, PowerModeTypeDef Modes);
-SensorModeTypeDef MMA845x_Set_Sensor_HP_Cutoff_Frequency(unsigned char Sensor_Mode_Value, PowerModeTypeDef Modes);
-SensorModeTypeDef MMA845x_Set_Sensor_Filter(SensorFilterType filter);
-SensorModeTypeDef MMA845x_Set_Sensor_State(SensorStates states);
+SensorMode MMA845x_Set_Sensor_G_Mode(G_mode mode);
+SensorMode MMA845x_Set_Data_Rate(unsigned char Data_Rate_Value);
+SensorMode MMA845x_Set_Sensor_Power_Mode(unsigned char Sensor_Mode_Value, PowerModeTypeDef Modes);
+SensorMode MMA845x_Set_Sensor_HP_Cutoff_Frequency(unsigned char Sensor_Mode_Value, PowerModeTypeDef Modes);
+SensorMode MMA845x_Set_Sensor_Filter_Type(SensorFilterType filter);
+SensorMode MMA845x_Set_Sensor_State(SensorStates states);
+SensorData MMA845x_Read_Sensor_Value();
+void SCI_s12dec_Out(uint16_t sensor_data);
+
+uint8_t XYZ_Data[6];
 
 uint8_t RxBuffer[1];
 uint8_t TxBuffer[1]={0x0D};
-
-
-
 
 
 int main(void)
@@ -137,24 +153,142 @@ int main(void)
   MX_I2C1_Init();
 
   retval = MMA845x_Test_Sensor(hi2c1, MMA845x_DEVICE_ADDR);
-  Sensor_ID_Response = MMA845x_Read_ID(&hi2c1, MMA845x_DEVICE_ADDR, MMA845x_WHO_AM_I_REG);
+  Sensor_ID_Response = MMA845x_Read_ID(hi2c1, MMA845x_DEVICE_ADDR, MMA845x_WHO_AM_I_REG);
 
-  MMA845x_Set_Data_Rate(SET_DATA_RATE_800Hz);
-  MMA845x_Set_Sensor_Power_Mode(SENSOR_NORMAL_POWER_MODE_VAL, SENSOR_NORMAL_POWER_MODE);
-  MMA845x_Set_Sensor_HP_Cutoff_Frequency(SET_CUTOFF_FREQ_16Hz, SENSOR_LOW_POWER_MODE);
+  MMA845x_Set_Sensor_State(SENSOR_STANDBY);
 
+  MMA845x_Set_Sensor_State(SENSOR_ACTIVE);
+
+  SensorData Data1;
+  uint16_t x;
+  uint16_t y;
+  uint16_t z;
 
 
    while (1)
   {
+	   Data1 =  MMA845x_Read_Sensor_Value();
+	   x = Data1.x_data;
+	   y = Data1.y_data;
+	   z = Data1.z_data;
 
+       // Test data with SCI_s12dec_Out
+       printf("X: ");
+       SCI_s12dec_Out(x);
+       printf("\n");
 
+       printf("Y: ");
+       SCI_s12dec_Out(y);
+       printf("\n");
+
+       printf("Z: ");
+       SCI_s12dec_Out(z);
+       printf("\n");
+
+       HAL_Delay(100);
   }
 
 }
 
+int _write(int file, char *ptr, int len)
+{
+  (void)file;
+  int DataIdx;
 
-SensorModeTypeDef MMA845x_Set_Sensor_Filter(SensorFilterType filter){/* sensor_active mode ?? sensor_standby_mode ?? */
+  for (DataIdx = 0; DataIdx < len; DataIdx++)
+  {
+    ITM_SendChar(*ptr++);
+  }
+  return len;
+}
+
+void SCI_s12dec_Out(uint16_t sensor_data)
+{
+	uint8_t thousands, hundreds, tens, ones;
+    uint16_t r;
+
+    /*
+     ** Check data's sign
+     */
+    if (sensor_data > 0x7FF)
+    {
+    	putchar('-');
+    	sensor_data = (~sensor_data + 1) & 0x0FFF; // 2's complement and 12-bit mask
+    }
+    else
+    {
+    	putchar('+');
+    }
+
+
+    thousands = (uint8_t)(sensor_data / 1000);
+    r = sensor_data % 1000;
+    hundreds = (uint8_t)(r / 100);
+    r = (uint8_t)(r % 100);
+    tens = (uint8_t)(r / 10);
+    ones = (uint8_t)(r % 10);
+
+    /*
+     ** Format adjustment for leading zeros
+     */
+    if (thousands == 0)
+    {
+    	thousands = 0xF0;
+        if (hundreds == 0)
+        {
+        	hundreds = 0xF0;
+        }
+        	if (tens == 0)
+        	{
+        		tens = 0xF0;
+        	}
+    }
+
+    /*
+     ** Output result
+     */
+    putchar(thousands + '0');
+    putchar(hundreds + '0');
+    putchar(tens + '0');
+    putchar(ones + '0');
+}
+
+SensorData MMA845x_Read_Sensor_Value(){
+	uint8_t reg_status;
+	uint8_t xyz_data_val[6];
+
+	SensorData Data;
+	HAL_StatusTypeDef ret_val = HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_STATUS_REG, REG_SIZE, &reg_status, 1, 100);
+	if(HAL_ERROR == ret_val){
+		Data.x_data = -2;
+		Data.y_data = -2;
+		Data.z_data = -2;
+		return Data;
+	}
+
+	/*Check X, Y, Z-axis new data ready. Polling ... */
+	if(reg_status & ZYXDR_BIT){
+		/*Read  */
+		HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_OUT_X_MSB, REG_SIZE, &xyz_data_val [0], 1, 100);
+		HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_OUT_X_LSB, REG_SIZE, &xyz_data_val [1], 1, 100);
+		HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_OUT_Y_MSB, REG_SIZE, &xyz_data_val [2], 1, 100);
+		HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_OUT_Y_LSB, REG_SIZE, &xyz_data_val [3], 1, 100);
+		HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_OUT_Z_MSB, REG_SIZE, &xyz_data_val [4], 1, 100);
+		HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_OUT_Z_LSB, REG_SIZE, &xyz_data_val [5], 1, 100);
+	}
+	Data.x_data = (xyz_data_val[0] << 8) | xyz_data_val[1];
+	Data.x_data >>= 4;
+
+	Data.y_data = (xyz_data_val[2] << 8) | xyz_data_val[3];
+	Data.y_data >>= 4;
+
+	Data.z_data = (xyz_data_val[4] << 8) | xyz_data_val[5];
+	Data.z_data >>= 4;
+
+	return Data;
+}
+
+SensorMode MMA845x_Set_Sensor_Filter_Type(SensorFilterType filter){
 
 	uint8_t reg_status;
 	HAL_StatusTypeDef ret_val = HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR<<1), MMA845x_XYZ_DATA_CFG_REG, REG_SIZE, &reg_status, 1, 100);
@@ -176,9 +310,7 @@ SensorModeTypeDef MMA845x_Set_Sensor_Filter(SensorFilterType filter){/* sensor_a
 	return SENSOR_ERROR;
 }
 
-
-
-SensorModeTypeDef MMA845x_Set_Sensor_HP_Cutoff_Frequency(unsigned char Sensor_Mode_Value, PowerModeTypeDef Modes){
+SensorMode MMA845x_Set_Sensor_HP_Cutoff_Frequency(unsigned char Sensor_Mode_Value, PowerModeTypeDef Modes){
 
 	uint8_t cutoff_reg_status;
 	HAL_StatusTypeDef ret_val;
@@ -209,7 +341,7 @@ SensorModeTypeDef MMA845x_Set_Sensor_HP_Cutoff_Frequency(unsigned char Sensor_Mo
 }
 
 
-SensorModeTypeDef MMA845x_Set_Sensor_Power_Mode(unsigned char Sensor_Mode_Value, PowerModeTypeDef Modes){
+SensorMode MMA845x_Set_Sensor_Power_Mode(unsigned char Sensor_Mode_Value, PowerModeTypeDef Modes){
 	uint8_t reg_status;
 
 	Sensor_Mode_Value = Sensor_Mode_Value << 3;
@@ -219,23 +351,17 @@ SensorModeTypeDef MMA845x_Set_Sensor_Power_Mode(unsigned char Sensor_Mode_Value,
 
 	if(SENSOR_NORMAL_POWER_MODE == Modes){
 
-		MMA845x_Set_Sensor_State(SENSOR_STANDBY);
-
 		HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL2_REG, REG_SIZE, &reg_status, 1, 100);
 
 		/*DATA_ MASK*/
 		reg_status &= ~(MMA845x_CTRL2_REG_BIT3_BIT4_MASK);
 
 		HAL_I2C_Mem_Write(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL2_REG, REG_SIZE, &reg_status, 1, 100);
-
-		MMA845x_Set_Sensor_State(SENSOR_ACTIVE);
 
 		return SENSOR_OK;
 
 	}else if(SENSOR_LOW_NOISE_LOW_POWER_MODE == Modes){
 
-		MMA845x_Set_Sensor_State(SENSOR_STANDBY);
-
 		HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL2_REG, REG_SIZE, &reg_status, 1, 100);
 
 		/*DATA_ MASK*/
@@ -243,15 +369,11 @@ SensorModeTypeDef MMA845x_Set_Sensor_Power_Mode(unsigned char Sensor_Mode_Value,
 		reg_status |=	Sensor_Mode_Value;
 
 		HAL_I2C_Mem_Write(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL2_REG, REG_SIZE, &reg_status, 1, 100);
-
-		MMA845x_Set_Sensor_State(SENSOR_ACTIVE);
 
 		return SENSOR_OK;
 
 	}else if(SENSOR_HIGH_RESOLUTION_MODE == Modes){
 
-		MMA845x_Set_Sensor_State(SENSOR_STANDBY);
-
 		HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL2_REG, REG_SIZE, &reg_status, 1, 100);
 
 		/*DATA_ MASK*/
@@ -260,15 +382,11 @@ SensorModeTypeDef MMA845x_Set_Sensor_Power_Mode(unsigned char Sensor_Mode_Value,
 		reg_status |=	Sensor_Mode_Value;
 
 		HAL_I2C_Mem_Write(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL2_REG, REG_SIZE, &reg_status, 1, 100);
-
-		MMA845x_Set_Sensor_State(SENSOR_ACTIVE);
 
 		return SENSOR_OK;
 
 	}else if(SENSOR_LOW_POWER_MODE == Modes){
 
-		MMA845x_Set_Sensor_State(SENSOR_STANDBY);
-
 		HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL2_REG, REG_SIZE, &reg_status, 1, 100);
 
 		/*DATA_ MASK*/
@@ -277,8 +395,6 @@ SensorModeTypeDef MMA845x_Set_Sensor_Power_Mode(unsigned char Sensor_Mode_Value,
 		reg_status |=	Sensor_Mode_Value;
 
 		HAL_I2C_Mem_Write(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL2_REG, REG_SIZE, &reg_status, 1, 100);
-
-		MMA845x_Set_Sensor_State(SENSOR_ACTIVE);
 
 		return SENSOR_OK;
 
@@ -288,19 +404,12 @@ SensorModeTypeDef MMA845x_Set_Sensor_Power_Mode(unsigned char Sensor_Mode_Value,
 
 }
 
-
-
-
-//HAL_I2C_Mem_Write(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL1_REG, REG_SIZE, &reg_status, 1, 100); ????????????????????????????
-
-SensorModeTypeDef MMA845x_Set_Data_Rate(unsigned char Data_Rate_Value){
+SensorMode MMA845x_Set_Data_Rate(unsigned char Data_Rate_Value){
 
 	if(Data_Rate_Value > MAX_NUM_OF_SCALE_VALUE)
 		return SENSOR_ERROR;
 
 	uint8_t reg_status;
-
-	MMA845x_Set_Sensor_State(SENSOR_STANDBY);
 
 	Data_Rate_Value = Data_Rate_Value << 3;																				  /* To write this Control Register's Bit5, Bit4, Bit3 */
 
@@ -312,15 +421,12 @@ SensorModeTypeDef MMA845x_Set_Data_Rate(unsigned char Data_Rate_Value){
 
 	HAL_I2C_Mem_Write(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL1_REG, REG_SIZE, &reg_status, 1, 100);
 
-	MMA845x_Set_Sensor_State(SENSOR_ACTIVE);
-
 	return SENSOR_OK;
 }
 
-SensorModeTypeDef MMA845x_Set_Sensor_G_Mode(G_mode mode){
+SensorMode MMA845x_Set_Sensor_G_Mode(G_mode mode){
 
 	uint8_t reg_status;
-	MMA845x_Set_Sensor_State(SENSOR_STANDBY);
 
 	HAL_StatusTypeDef retval;
 	retval = HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_XYZ_DATA_CFG_REG, REG_SIZE, &reg_status, 1, 100);
@@ -348,13 +454,12 @@ SensorModeTypeDef MMA845x_Set_Sensor_G_Mode(G_mode mode){
 		return SENSOR_ERROR;
 
 
-	MMA845x_Set_Sensor_State(SENSOR_ACTIVE);
-		return SENSOR_OK;
+	return SENSOR_OK;
 
 
 }
 
-SensorModeTypeDef MMA845x_Set_Sensor_State(SensorStates states){
+SensorMode MMA845x_Set_Sensor_State(SensorStates states){
 	uint8_t reg_status;
 	HAL_StatusTypeDef retval;
 	retval = HAL_I2C_Mem_Read(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL1_REG, REG_SIZE, &reg_status, 1, 100);
@@ -363,11 +468,11 @@ SensorModeTypeDef MMA845x_Set_Sensor_State(SensorStates states){
 		return SENSOR_ERROR;
 
 	if(SENSOR_STANDBY == states ){
-		reg_status &= ~(MMA845x_ACTIVE_MASK_BIT);
+		reg_status &= ~(ACTIVE_MASK_BIT);
 		HAL_I2C_Mem_Write(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL1_REG, REG_SIZE, &reg_status, 1, 100);
 		return SENSOR_OK;
 	}else if(SENSOR_ACTIVE == states){
-		reg_status |= (MMA845x_ACTIVE_MASK_BIT);
+		reg_status |= (ACTIVE_MASK_BIT);
 		HAL_I2C_Mem_Write(&hi2c1, (MMA845x_DEVICE_ADDR << 1), MMA845x_CTRL1_REG, REG_SIZE, &reg_status, 1 , 100);
 		return SENSOR_OK;
 	}
@@ -386,10 +491,10 @@ int MMA845x_Test_Sensor(I2C_HandleTypeDef hi2c, uint8_t Device_Addres){
 		return 0;
 }
 
-uint8_t MMA845x_Read_ID(I2C_HandleTypeDef* hi2c, uint8_t Device_Addres, uint8_t RegAddress){
+uint8_t MMA845x_Read_ID(I2C_HandleTypeDef hi2c, uint8_t Device_Addres, uint8_t RegAddress){
 
 	uint8_t RxBuffer[1];
-	HAL_I2C_Mem_Read(hi2c, (Device_Addres << 1), RegAddress, REG_SIZE, RxBuffer, 1, 100);
+	HAL_I2C_Mem_Read(&hi2c, (Device_Addres << 1), RegAddress, REG_SIZE, RxBuffer, 1, 100);
 
 	if(0x2A == RxBuffer[0])
 		return *RxBuffer;
