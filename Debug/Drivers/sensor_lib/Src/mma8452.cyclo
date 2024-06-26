@@ -1,0 +1,11 @@
+../Drivers/CMSIS/Include/core_cm4.h:2064:26:ITM_SendChar	4
+../Drivers/sensor_lib/Src/mma8452.c:13:5:_write	2
+../Drivers/sensor_lib/Src/mma8452.c:25:6:SCI_s12dec_Out	5
+../Drivers/sensor_lib/Src/mma8452.c:76:12:MMA845x_Read_Sensor_Value	3
+../Drivers/sensor_lib/Src/mma8452.c:111:12:MMA845x_Set_Sensor_Filter_Type	4
+../Drivers/sensor_lib/Src/mma8452.c:133:12:MMA845x_Set_Sensor_HP_Cutoff_Frequency	7
+../Drivers/sensor_lib/Src/mma8452.c:164:12:MMA845x_Set_Sensor_Power_Mode	6
+../Drivers/sensor_lib/Src/mma8452.c:227:12:MMA845x_Set_Data_Rate	2
+../Drivers/sensor_lib/Src/mma8452.c:247:12:MMA845x_Set_Sensor_G_Mode	5
+../Drivers/sensor_lib/Src/mma8452.c:282:12:MMA845x_Set_Sensor_State	4
+../Drivers/sensor_lib/Src/mma8452.c:304:9:MMA845x_Read_ID	2

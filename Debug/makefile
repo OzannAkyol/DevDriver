@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (10.3-2021.10)
+# Toolchain: GNU Tools for STM32 (12.3.rel1)
 ################################################################################
 
 -include ../makefile.init
@@ -9,6 +9,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Drivers/sensor_lib/Src/subdir.mk
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
@@ -60,8 +61,8 @@ all: main-build
 main-build: 5_MMA845x_Sensor.elf secondary-outputs
 
 # Tool invocations
-5_MMA845x_Sensor.elf 5_MMA845x_Sensor.map: $(OBJS) $(USER_OBJS) C:\Users\ozana\STM32CubeIDE\workspace_1.12.0\5_MMA845x_Sensor\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "5_MMA845x_Sensor.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\ozana\STM32CubeIDE\workspace_1.12.0\5_MMA845x_Sensor\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="5_MMA845x_Sensor.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+5_MMA845x_Sensor.elf 5_MMA845x_Sensor.map: $(OBJS) $(USER_OBJS) C:\Users\oakyol\STM32CubeIDE\DevDriver\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "5_MMA845x_Sensor.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\oakyol\STM32CubeIDE\DevDriver\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="5_MMA845x_Sensor.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

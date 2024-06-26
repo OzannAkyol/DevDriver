@@ -1,0 +1,34 @@
+!SESSION 2024-06-26 09:03:54.181 -----------------------------------------------
+eclipse.buildId=Version 1.15.0
+java.version=17.0.8.1
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2024-06-26 09:04:13.459
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2024-06-26 09:04:13.469
+!MESSAGE Log4j2 initialized with config file C:\Users\oakyol\STM32CubeIDE\DevDriver\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2024-06-26 09:04:15.959
+!MESSAGE Started RMI Server, listening on port 41338
+!SESSION 2024-06-26 09:05:52.423 -----------------------------------------------
+eclipse.buildId=Version 1.15.0
+java.version=17.0.8.1
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Framework arguments:  C:\Users\oakyol\STM32CubeIDE\DevDriver\.project
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 C:\Users\oakyol\STM32CubeIDE\DevDriver\.project
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2024-06-26 09:05:57.066
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2024-06-26 09:05:57.067
+!MESSAGE Log4j2 initialized with config file C:\Users\oakyol\STM32CubeIDE\DevDriver\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2024-06-26 09:05:59.428
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.core.jobs 2 2 2024-06-26 09:06:10.742
+!MESSAGE Job found still running after platform shutdown.  Jobs should be canceled by the plugin that scheduled them during shutdown: org.eclipse.ui.internal.Workbench$39

@@ -1,0 +1,11 @@
+../Drivers/CMSIS/Include/core_cm4.h:2064:26:ITM_SendChar	16	static,ignoring_inline_asm
+../Drivers/sensor_lib/Src/mma8452.c:13:5:_write	32	static
+../Drivers/sensor_lib/Src/mma8452.c:25:6:SCI_s12dec_Out	24	static
+../Drivers/sensor_lib/Src/mma8452.c:76:12:MMA845x_Read_Sensor_Value	48	static
+../Drivers/sensor_lib/Src/mma8452.c:111:12:MMA845x_Set_Sensor_Filter_Type	40	static
+../Drivers/sensor_lib/Src/mma8452.c:133:12:MMA845x_Set_Sensor_HP_Cutoff_Frequency	40	static
+../Drivers/sensor_lib/Src/mma8452.c:164:12:MMA845x_Set_Sensor_Power_Mode	40	static
+../Drivers/sensor_lib/Src/mma8452.c:227:12:MMA845x_Set_Data_Rate	40	static
+../Drivers/sensor_lib/Src/mma8452.c:247:12:MMA845x_Set_Sensor_G_Mode	40	static
+../Drivers/sensor_lib/Src/mma8452.c:282:12:MMA845x_Set_Sensor_State	40	static
+../Drivers/sensor_lib/Src/mma8452.c:304:9:MMA845x_Read_ID	32	static
