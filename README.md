@@ -15,13 +15,13 @@ In this project, I aim to develop a sensor driver using only its documentation. 
 
 ![Screenshot 2024-06-28 092227](https://github.com/OzannAkyol/DevDriver/assets/149076594/95b6441b-0a8b-4563-8ee0-ff3220cf5cef)
 
-**CLK** : Clock pin's at PA5 (For STM)
+**CLK** : Clock pin's at PA5 
 
-**SDA** : I2C Data Pin
+**SDA** : I2C Data Pin 
 
-**VDD** : 3.3V for Stm32
+**VDD** : 3.3V 
 
-**SA0** : ID pin's of Sensor. 
+**SA0** : ID pin's of Sensor.
 
 **GND** : Ground Pin. 
 
