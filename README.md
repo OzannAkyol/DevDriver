@@ -1,6 +1,6 @@
 **MMA8452 ACCELEROMETER & STMF407VGT6 DISCOVERY BOARD**
 
-In this project, I aim to develop a sensor driver and write it's test function. From now on, I will share all relevant documentation above.
+In this project, I aim to develop a sensor driver and write it's test function. From now on, Let's share all relevant documentation above.
 
 ***MMA8452Q Accelerometer***: https://www.nxp.com/docs/en/data-sheet/MMA8452Q.pdf
 
